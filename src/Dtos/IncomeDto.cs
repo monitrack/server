@@ -1,6 +1,6 @@
-namespace server.Models;
+namespace server.Dtos;
 
-public class Income : BaseEntity
+public class IncomeDto
 {
     public required decimal Amount { get; set; }
 
