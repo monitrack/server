@@ -39,7 +39,6 @@ public class IncomeController : ApiControllerBase
     }
 
     [HttpDelete("{id}")]
-
     public async Task<ActionResult> Delete(int id)
     {
         // TODO: Delete the income
