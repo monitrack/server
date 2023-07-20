@@ -1,12 +1,12 @@
 namespace server.Models;
 
-public class Income
+public class Income : BaseEntity
 {
-    public float Amount { get; set; }
+    public decimal Amount { get; set; }
 
-    public required string Date { get; set; }
+    public required DateTime Date { get; set; }
     
-    public string? Comment { get; set; }
+    public string? Note { get; set; }
 
     public required string Method { get; set; }
 }

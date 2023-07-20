@@ -2,13 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Server.Controllers;
 
-[ApiController]
 [Route("api/[controller]")]
 public class IncomeController : ApiControllerBase
 {
     [HttpGet("{id}")]
-    public IActionResult Show(int id)
+    public IActionResult GetIncomeInfoById(int id)
     {
-        return Ok();
+        throw new NotImplementedException();
     }
 }
