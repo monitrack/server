@@ -8,7 +8,7 @@ public class IncomeDto
     
     public string? Note { get; set; }
 
-    public required string Category { get; set; }
+    public string Category { get; set; } = null!;
 
-    public required string Account { get; set; }
+    public required int MethodId { get; set; }
 }
