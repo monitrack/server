@@ -64,7 +64,6 @@ public class IncomeController : ApiControllerBase
     }
 
     [HttpDelete("{id}")]
-
     public async Task<ActionResult> Delete(int id)
     {
         Income? income = await _context.Incomes.FirstOrDefaultAsync(i => i.Id == id);
