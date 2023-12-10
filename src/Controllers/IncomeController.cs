@@ -6,24 +6,23 @@ using server.Models;
 
 namespace Server.Controllers;
 
-[Route("api/[controller]")]
 public class IncomeController : ApiControllerBase
 {
-    private MoniTrackContext _context; 
-    
+    private MoniTrackContext _context;
+
     public IncomeController()
     {
         _context = new MoniTrackContext();
     }
-    
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<IncomeDto>>> GetAll()
     {
         // TODO: fetch incomes
-        
+
         throw new NotImplementedException();
     }
-    
+
     [HttpGet("{id}")]
     public async Task<ActionResult<Income>> GetIncomeInfoById(int id)
     {
@@ -33,7 +32,7 @@ public class IncomeController : ApiControllerBase
         {
             return NotFound();
         }
-        
+
         return Ok(income);
     }
 
@@ -59,7 +58,7 @@ public class IncomeController : ApiControllerBase
     public async Task<ActionResult<IncomeDto>> Update([FromBody] IncomeDto incomeDto)
     {
         // TODO: Update income
-        
+
         throw new NotImplementedException();
     }
 
@@ -72,7 +71,7 @@ public class IncomeController : ApiControllerBase
         {
             return NotFound();
         }
-        
+
         _context.Incomes.Remove(income);
         await _context.SaveChangesAsync();
 

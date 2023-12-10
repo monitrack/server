@@ -5,7 +5,6 @@ using server.Models;
 
 namespace Server.Controllers;
 
-[Route("[controller]")]
 public class MethodController : ApiControllerBase
 {
     private MoniTrackContext _context; 
