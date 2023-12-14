@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using server.Context;
 
@@ -10,9 +11,11 @@ using server.Context;
 namespace server.Migrations
 {
     [DbContext(typeof(MoniTrackContext))]
-    partial class MoniTrackContextModelSnapshot : ModelSnapshot
+    [Migration("20231210184943_AddExpense")]
+    partial class AddExpense
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.9");
@@ -30,9 +33,6 @@ namespace server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
 
@@ -42,6 +42,9 @@ namespace server.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("TEXT");
 
@@ -49,7 +52,7 @@ namespace server.Migrations
 
                     b.HasIndex("MethodId");
 
-                    b.ToTable("Expenses", (string)null);
+                    b.ToTable("Expenses");
                 });
 
             modelBuilder.Entity("server.Models.Income", b =>
@@ -78,7 +81,7 @@ namespace server.Migrations
 
                     b.HasIndex("MethodId");
 
-                    b.ToTable("Incomes", (string)null);
+                    b.ToTable("Incomes");
                 });
 
             modelBuilder.Entity("server.Models.Method", b =>
@@ -93,7 +96,7 @@ namespace server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Method", (string)null);
+                    b.ToTable("Method");
                 });
 
             modelBuilder.Entity("server.Models.Expense", b =>

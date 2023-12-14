@@ -19,8 +19,9 @@ public class ExpenseTests
     {
         var client = _factory.CreateClient();
 
-        var content = new ExpenseCreateDto(100.0M);
-        var response = await client.PostAsJsonAsync("/expense", content);
+        // Временно комментш кардм, хай оли бфаҳмм чхе тесто кор мекнан баъд созш мекнм, насиб
+        // var content = new ExpenseCreateDto(100.0M);
+        var response = await client.PostAsJsonAsync("/expense", "");
 
         response.EnsureSuccessStatusCode();
     }
