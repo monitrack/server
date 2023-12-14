@@ -33,7 +33,9 @@ namespace server.Migrations
                     Amount = table.Column<decimal>(type: "TEXT", nullable: false),
                     Date = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Note = table.Column<string>(type: "TEXT", nullable: true),
-                    MethodId = table.Column<int>(type: "INTEGER", nullable: false)
+                    MethodId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "GETDATE()"),
+                    UpdatedDate = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "GETDATE()"),
                 },
                 constraints: table =>
                 {

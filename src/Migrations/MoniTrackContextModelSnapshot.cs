@@ -30,6 +30,9 @@ namespace server.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
 
@@ -39,11 +42,14 @@ namespace server.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MethodId");
 
-                    b.ToTable("Expenses");
+                    b.ToTable("Expenses", (string)null);
                 });
 
             modelBuilder.Entity("server.Models.Income", b =>
@@ -72,7 +78,7 @@ namespace server.Migrations
 
                     b.HasIndex("MethodId");
 
-                    b.ToTable("Incomes");
+                    b.ToTable("Incomes", (string)null);
                 });
 
             modelBuilder.Entity("server.Models.Method", b =>
@@ -87,7 +93,7 @@ namespace server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Method");
+                    b.ToTable("Method", (string)null);
                 });
 
             modelBuilder.Entity("server.Models.Expense", b =>

@@ -37,6 +37,12 @@ namespace server.Migrations
 
                     b.Property<string>("Note")
                         .HasColumnType("TEXT");
+                    
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+                    
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
