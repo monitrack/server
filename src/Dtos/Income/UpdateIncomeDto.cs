@@ -1,6 +1,6 @@
-namespace server.Dtos;
+namespace server.Dtos.Income;
 
-public class IncomeDto
+public class UpdateIncomeDto
 {
     public required decimal Amount { get; set; }
 
@@ -8,7 +8,9 @@ public class IncomeDto
     
     public string? Note { get; set; }
 
-    public string Category { get; set; } = null!;
+    public required int CategoryId { get; set; }
+
+    public required string CategoryType { get; set; }
 
     public required int MethodId { get; set; }
 }

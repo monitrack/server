@@ -1,8 +1,8 @@
-using FluentValidation;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Context;
-using server.Dtos;
+using server.Dtos.Expense;
 using server.Models;
 using server.Validators;
 
@@ -10,128 +10,99 @@ namespace Server.Controllers;
 
 public class ExpenseController : ApiControllerBase
 {
-    private readonly MoniTrackContext _dbContext;
+    private readonly ApplicationDbContext _dbContext;
 
-    public ExpenseController(MoniTrackContext dbContext)
+    public ExpenseController(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }
 
     [HttpPost]
-    public async Task<ActionResult<ExpenseDto>> Create([FromBody] ExpenseDto expenseDto)
+    public async Task<ActionResult<Expense>> Create(CreateExpenseDto createExpenseDto)
     {
-        try
+        Expense expense = new Expense
         {
-            ExpenseDtoValidator validator = new ExpenseDtoValidator();
-            await validator.ValidateAndThrowAsync(expenseDto);
+            Amount = createExpenseDto.Amount,
+            Date = createExpenseDto.Date,
+            Note = createExpenseDto.Note,
+            CategoryId = createExpenseDto.CategoryId,
+            CategoryType = createExpenseDto.CategoryType,
+            MethodId = createExpenseDto.MethodId,
+        };
 
-            Expense expense = new Expense()
-            {
-                Amount = expenseDto.Amount,
-                Date = expenseDto.Date,
-                Note = expenseDto.Note,
-                Category = expenseDto.Category,
-                MethodId = expenseDto.MethodId
-            };
-
-            await _dbContext.Expenses.AddAsync(expense);
-            await _dbContext.SaveChangesAsync();
-
-            return Ok(expense);
-        }
-        catch (ValidationException exception)
+        ExpenseValidator validator = new ExpenseValidator();
+        ValidationResult validationResult = await validator.ValidateAsync(expense);
+        if (!validationResult.IsValid)
         {
-            return ValidationProblem(exception.Message);
+            return ValidationProblem(validationResult.ToString());
         }
-        catch (Exception exception)
-        {
-            return Problem("Something went wrong when creating expense. Exception message: " + exception.Message);
-        }
+
+        await _dbContext.Expenses.AddAsync(expense);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(expense);
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<ExpenseDto>> Update(int id, [FromBody] ExpenseDto expenseDto)
+    public async Task<ActionResult<Expense>> Update(int id, UpdateExpenseDto updateExpenseDto)
     {
-        try
+        Expense? expense = await _dbContext.Expenses.FindAsync(id);
+        if (expense is null)
         {
-            ExpenseDtoValidator validator = new ExpenseDtoValidator();
-            await validator.ValidateAndThrowAsync(expenseDto);
-
-            Expense? expense = await _dbContext.Expenses.FirstOrDefaultAsync(expense => expense.Id == id);
-
-            if (expense is null)
-            {
-                return NotFound();
-            }
-
-            expense.Amount = expenseDto.Amount;
-            expense.Date = expenseDto.Date;
-            expense.Note = expenseDto.Note;
-            expense.Category = expenseDto.Category;
-            expense.MethodId = expenseDto.MethodId;
-            expense.UpdatedDate = DateTime.Now;
-
-            _dbContext.Expenses.Update(expense);
-            await _dbContext.SaveChangesAsync();
-
-            return Ok(expense);
+            return NotFound($"Expense with id {id} not found!");
         }
-        catch (ValidationException exception)
+
+        expense.Amount = updateExpenseDto.Amount;
+        expense.Date = updateExpenseDto.Date;
+        expense.Note = updateExpenseDto.Note;
+        expense.CategoryId = updateExpenseDto.CategoryId;
+        expense.CategoryType = updateExpenseDto.CategoryType;
+        expense.MethodId = updateExpenseDto.MethodId;
+        expense.UpdatedDate = DateTime.Now;
+
+        ExpenseValidator validator = new ExpenseValidator();
+        ValidationResult validationResult = await validator.ValidateAsync(expense);
+        if (!validationResult.IsValid)
         {
-            return ValidationProblem(exception.Message);
+            return ValidationProblem(validationResult.ToString());
         }
-        catch (Exception exception)
-        {
-            return Problem("Something went wrong when updating expense. Exception message: " + exception.Message);
-        }
+
+        _dbContext.Expenses.Update(expense);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(expense);
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        try
+        Expense? expense = await _dbContext.Expenses.FindAsync(id);
+        if (expense is null)
         {
-            Expense? expense = await _dbContext.Expenses.FirstOrDefaultAsync(expense => expense.Id == id);
-
-            if (expense is null)
-            {
-                return NotFound();
-            }
-
-            _dbContext.Expenses.Remove(expense);
-            await _dbContext.SaveChangesAsync();
-
-            return Ok();
+            return NotFound($"Expense with id {id} not found!");
         }
-        catch (Exception exception)
-        {
-            return Problem("Something went wrong when deleting expense. Exception message: " + exception.Message);
-        }
+
+        _dbContext.Expenses.Remove(expense);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok();
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult> GetById(int id)
+    public async Task<ActionResult<Expense>> GetById(int id)
     {
-        try
+        Expense? expense = await _dbContext.Expenses.FindAsync(id);
+        if (expense is null)
         {
-            Expense? expense = await _dbContext.Expenses.FirstOrDefaultAsync(expense => expense.Id == id);
-            
-            if (expense is null)
-            {
-                return NotFound();
-            }
+            return NotFound($"Expense with id {id} not found!");
+        }
 
-            return Ok(expense);
-        }
-        catch (Exception exception)
-        {
-            return Problem("Something went wrong when getting expense. Exception message: " + exception.Message);
-        }
+        return Ok(expense);
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Expense>>> GetAll()
+    public async Task<ActionResult<List<Expense>>> GetAll()
     {
-        return await _dbContext.Expenses.ToListAsync();
+        return Ok(await _dbContext.Expenses.ToListAsync());
     }
 }

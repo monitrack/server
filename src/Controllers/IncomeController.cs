@@ -1,80 +1,93 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Context;
-using server.Dtos;
+using server.Dtos.Income;
 using server.Models;
 
 namespace Server.Controllers;
 
 public class IncomeController : ApiControllerBase
 {
-    private MoniTrackContext _context;
+    private readonly ApplicationDbContext _dbContext;
 
-    public IncomeController()
+    public IncomeController(ApplicationDbContext dbContext)
     {
-        _context = new MoniTrackContext();
-    }
-
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<IncomeDto>>> GetAll()
-    {
-        // TODO: fetch incomes
-
-        throw new NotImplementedException();
-    }
-
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Income>> GetIncomeInfoById(int id)
-    {
-        Income? income = await _context.Incomes.FirstOrDefaultAsync(i => i.Id == id);
-
-        if (income is null)
-        {
-            return NotFound();
-        }
-
-        return Ok(income);
+        _dbContext = dbContext;
     }
 
     [HttpPost]
-    public async Task<ActionResult<IncomeDto>> Create([FromBody] IncomeDto incomeDto)
+    public async Task<ActionResult<CreateIncomeDto>> Create(CreateIncomeDto createIncomeDto)
     {
-        Income income = new Income()
+        Income income = new Income
         {
-            Amount = incomeDto.Amount,
-            Date = incomeDto.Date,
-            Note = incomeDto.Note,
-            Category = incomeDto.Category,
-            MethodId = incomeDto.MethodId
+            Amount = createIncomeDto.Amount,
+            Date = createIncomeDto.Date,
+            Note = createIncomeDto.Note,
+            CategoryId = createIncomeDto.CategoryId,
+            CategoryType = createIncomeDto.CategoryType,
+            MethodId = createIncomeDto.MethodId
         };
 
-        await _context.Incomes.AddAsync(income);
-        await _context.SaveChangesAsync();
+        await _dbContext.Incomes.AddAsync(income);
+        await _dbContext.SaveChangesAsync();
 
         return Ok(income);
     }
 
-    [HttpPut]
-    public async Task<ActionResult<IncomeDto>> Update([FromBody] IncomeDto incomeDto)
+    [HttpPut("{id}")]
+    public async Task<ActionResult<CreateIncomeDto>> Update(int id, UpdateIncomeDto updateIncomeDto)
     {
-        // TODO: Update income
+        Income? income = await _dbContext.Incomes.FindAsync(id);
+        if (income is null)
+        {
+            return NotFound($"Income with id {id} not found!");
+        }
 
-        throw new NotImplementedException();
+        income.Amount = updateIncomeDto.Amount;
+        income.Date = updateIncomeDto.Date;
+        income.Note = updateIncomeDto.Note;
+        income.CategoryId = updateIncomeDto.CategoryId;
+        income.CategoryType = updateIncomeDto.CategoryType;
+        income.MethodId = updateIncomeDto.MethodId;
+        income.UpdatedDate = DateTime.Now;
+
+        _dbContext.Incomes.Update(income);
+        await _dbContext.SaveChangesAsync();
+
+        return Ok(income);
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        Income? income = await _context.Incomes.FirstOrDefaultAsync(i => i.Id == id);
+        Income? income = await _dbContext.Incomes.FirstOrDefaultAsync(i => i.Id == id);
 
         if (income is null)
         {
             return NotFound();
         }
 
-        _context.Incomes.Remove(income);
-        await _context.SaveChangesAsync();
+        _dbContext.Incomes.Remove(income);
+        await _dbContext.SaveChangesAsync();
 
         return Ok();
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Income>> GetById(int id)
+    {
+        Income? income = await _dbContext.Incomes.FindAsync(id);
+        if (income is null)
+        {
+            return NotFound($"Income with id {id} not found!");
+        }
+
+        return Ok(income);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<List<Income>>> GetAll()
+    {
+        return Ok(await _dbContext.Incomes.ToListAsync());
     }
 }

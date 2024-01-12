@@ -1,6 +1,6 @@
-namespace server.Dtos;
+namespace server.Dtos.Expense;
 
-public class ExpenseDto
+public class CreateExpenseDto
 {
     public required decimal Amount { get; set; }
 
@@ -8,7 +8,9 @@ public class ExpenseDto
 
     public string? Note { get; set; } = null;
 
-    public string Category { get; set; } = null!;
+    public required int CategoryId { get; set; }
+
+    public required string CategoryType { get; set; }
 
     public required int MethodId { get; set; }
 }
