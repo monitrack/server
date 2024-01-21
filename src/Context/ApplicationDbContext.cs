@@ -5,12 +5,13 @@ namespace server.Context;
 
 public class ApplicationDbContext : DbContext
 {
-    public DbSet<User> Users { get; set; } = null!;
-    public DbSet<Category> Categories { get; set; } = null!;
-    public DbSet<UserCategory> UserCategories { get; set; } = null!;
-    public DbSet<Method> Methods { get; set; } = null!;
-    public DbSet<Income> Incomes { get; set; } = null!;
-    public DbSet<Expense> Expenses { get; set; } = null!;
+    #nullable disable
+    public DbSet<User> Users { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<UserCategory> UserCategories { get; set; }
+    public DbSet<Method> Methods { get; set; }
+    public DbSet<Income> Incomes { get; set; }
+    public DbSet<Expense> Expenses { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {

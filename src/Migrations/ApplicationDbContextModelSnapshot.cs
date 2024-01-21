@@ -69,16 +69,11 @@ namespace server.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("UserCategoryId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("MethodId");
-
-                    b.HasIndex("UserCategoryId");
 
                     b.ToTable("Expenses");
                 });
@@ -114,16 +109,11 @@ namespace server.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("UserCategoryId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("MethodId");
-
-                    b.HasIndex("UserCategoryId");
 
                     b.ToTable("Incomes");
                 });
@@ -232,12 +222,6 @@ namespace server.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("server.Models.UserCategory", null)
-                        .WithMany("Expenses")
-                        .HasForeignKey("UserCategoryId");
-
-                    b.Navigation("Category");
-
                     b.Navigation("Method");
                 });
 
@@ -254,12 +238,6 @@ namespace server.Migrations
                         .HasForeignKey("MethodId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("server.Models.UserCategory", null)
-                        .WithMany("Incomes")
-                        .HasForeignKey("UserCategoryId");
-
-                    b.Navigation("Category");
 
                     b.Navigation("Method");
                 });

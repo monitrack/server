@@ -12,9 +12,11 @@ public class Expense : BaseEntity
 
     public required string CategoryType { get; set; }
 
-    public Category Category { get; set; } = null!;
-
     public int MethodId { get; set; }
 
-    public Method Method { get; set; } = null!;
+#nullable disable
+
+    public Category Category { get; set; }
+
+    public Method Method { get; set; }
 }

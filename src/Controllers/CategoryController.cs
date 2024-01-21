@@ -1,10 +1,9 @@
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Context;
 using server.Dtos.Category;
 using server.Models;
-using server.Validators;
+using server.Responses.Category;
 
 namespace Server.Controllers;
 
@@ -18,7 +17,7 @@ public class CategoryController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Category>> Create(CreateCategoryDto createCategoryDto)
+    public async Task<ActionResult<CategoryResponse>> Create(CreateCategoryDto createCategoryDto)
     {
         DateTime now = DateTime.Now;
         Category category = new Category
@@ -28,21 +27,14 @@ public class CategoryController : ApiControllerBase
             UpdatedDate = now
         };
 
-        CategoryValidator validator = new CategoryValidator(_dbContext);
-        ValidationResult validationResult = await validator.ValidateAsync(category);
-        if (!validationResult.IsValid)
-        {
-            return ValidationProblem(validationResult.ToString());
-        }
-
-        await _dbContext.Categories.AddAsync(category);
+        _dbContext.Categories.Add(category);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(category);
+        return Ok(new CategoryResponse(category));
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Category>> Update(int id, UpdateCategoryDto updateCategoryDto)
+    public async Task<ActionResult<CategoryResponse>> Update(int id, UpdateCategoryDto updateCategoryDto)
     {
         Category? category = await _dbContext.Categories.FindAsync(id);
         if (category is null)
@@ -53,17 +45,10 @@ public class CategoryController : ApiControllerBase
         category.Name = updateCategoryDto.Name;
         category.UpdatedDate = DateTime.Now;
 
-        CategoryValidator validator = new CategoryValidator(_dbContext);
-        ValidationResult validationResult = await validator.ValidateAsync(category);
-        if (!validationResult.IsValid)
-        {
-            return ValidationProblem(validationResult.ToString());
-        }
-
         _dbContext.Categories.Update(category);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(category);
+        return Ok(new CategoryResponse(category));
     }
 
     [HttpDelete("{id}")]
@@ -82,7 +67,7 @@ public class CategoryController : ApiControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Category>> GetById(int id)
+    public async Task<ActionResult<CategoryResponse>> GetById(int id)
     {
         Category? category = await _dbContext.Categories.FindAsync(id);
         if (category is null)
@@ -90,12 +75,15 @@ public class CategoryController : ApiControllerBase
             return NotFound($"Category with id {id} not found!");
         }
 
-        return Ok(category);
+        return Ok(new CategoryResponse(category));
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Category>>> GetAll()
+    public async Task<ActionResult<List<CategoryResponse>>> GetAll()
     {
-        return Ok(await _dbContext.Categories.ToListAsync());
+        List<Category> categories = await _dbContext.Categories.ToListAsync();
+        List<CategoryResponse> responses = categories.Select(category => new CategoryResponse(category)).ToList();
+
+        return Ok(responses);
     }
 }

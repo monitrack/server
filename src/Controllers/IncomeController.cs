@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using server.Context;
 using server.Dtos.Income;
 using server.Models;
+using server.Responses.Income;
 
 namespace Server.Controllers;
 
@@ -16,8 +17,9 @@ public class IncomeController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<CreateIncomeDto>> Create(CreateIncomeDto createIncomeDto)
+    public async Task<ActionResult<IncomeResponse>> Create(CreateIncomeDto createIncomeDto)
     {
+        DateTime now = DateTime.Now;
         Income income = new Income
         {
             Amount = createIncomeDto.Amount,
@@ -25,17 +27,19 @@ public class IncomeController : ApiControllerBase
             Note = createIncomeDto.Note,
             CategoryId = createIncomeDto.CategoryId,
             CategoryType = createIncomeDto.CategoryType,
-            MethodId = createIncomeDto.MethodId
+            MethodId = createIncomeDto.MethodId,
+            CreatedDate = now,
+            UpdatedDate = now,
         };
 
-        await _dbContext.Incomes.AddAsync(income);
+        _dbContext.Incomes.Add(income);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(income);
+        return Ok(new IncomeResponse(income));
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<CreateIncomeDto>> Update(int id, UpdateIncomeDto updateIncomeDto)
+    public async Task<ActionResult<IncomeResponse>> Update(int id, UpdateIncomeDto updateIncomeDto)
     {
         Income? income = await _dbContext.Incomes.FindAsync(id);
         if (income is null)
@@ -54,7 +58,7 @@ public class IncomeController : ApiControllerBase
         _dbContext.Incomes.Update(income);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(income);
+        return Ok(new IncomeResponse(income));
     }
 
     [HttpDelete("{id}")]
@@ -74,7 +78,7 @@ public class IncomeController : ApiControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Income>> GetById(int id)
+    public async Task<ActionResult<IncomeResponse>> GetById(int id)
     {
         Income? income = await _dbContext.Incomes.FindAsync(id);
         if (income is null)
@@ -82,12 +86,15 @@ public class IncomeController : ApiControllerBase
             return NotFound($"Income with id {id} not found!");
         }
 
-        return Ok(income);
+        return Ok(new IncomeResponse(income));
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Income>>> GetAll()
+    public async Task<ActionResult<List<IncomeResponse>>> GetAll()
     {
-        return Ok(await _dbContext.Incomes.ToListAsync());
+        List<Income> incomes = await _dbContext.Incomes.ToListAsync();
+        List<IncomeResponse> responses = incomes.Select(income => new IncomeResponse(income)).ToList();
+        
+        return Ok(responses);
     }
 }

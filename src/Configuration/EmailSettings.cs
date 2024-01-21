@@ -1,3 +1,5 @@
+using server.Services;
+
 namespace server.Configuration;
 
 public class EmailSettings
@@ -7,4 +9,6 @@ public class EmailSettings
     public required string Host { get; set; }
     public required string DisplayName { get; set; }
     public required int Port { get; set; }
+
+    public const string Region = nameof(EmailSettings);
 }

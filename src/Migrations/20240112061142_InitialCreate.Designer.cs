@@ -72,16 +72,11 @@ namespace server.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("UserCategoryId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("MethodId");
-
-                    b.HasIndex("UserCategoryId");
 
                     b.ToTable("Expenses");
                 });
@@ -117,16 +112,11 @@ namespace server.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("UserCategoryId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("MethodId");
-
-                    b.HasIndex("UserCategoryId");
 
                     b.ToTable("Incomes");
                 });
@@ -236,8 +226,7 @@ namespace server.Migrations
                         .IsRequired();
 
                     b.HasOne("server.Models.UserCategory", null)
-                        .WithMany("Expenses")
-                        .HasForeignKey("UserCategoryId");
+                        .WithMany("Expenses");
 
                     b.Navigation("Category");
 
@@ -259,8 +248,7 @@ namespace server.Migrations
                         .IsRequired();
 
                     b.HasOne("server.Models.UserCategory", null)
-                        .WithMany("Incomes")
-                        .HasForeignKey("UserCategoryId");
+                        .WithMany("Incomes");
 
                     b.Navigation("Category");
 

@@ -1,10 +1,9 @@
-using FluentValidation.Results;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Context;
 using server.Dtos.Expense;
 using server.Models;
-using server.Validators;
+using server.Responses.Expense;
 
 namespace Server.Controllers;
 
@@ -18,8 +17,9 @@ public class ExpenseController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Expense>> Create(CreateExpenseDto createExpenseDto)
+    public async Task<ActionResult<ExpenseResponse>> Create(CreateExpenseDto createExpenseDto)
     {
+        DateTime now = DateTime.Now;
         Expense expense = new Expense
         {
             Amount = createExpenseDto.Amount,
@@ -28,23 +28,18 @@ public class ExpenseController : ApiControllerBase
             CategoryId = createExpenseDto.CategoryId,
             CategoryType = createExpenseDto.CategoryType,
             MethodId = createExpenseDto.MethodId,
+            CreatedDate = now,
+            UpdatedDate = now,
         };
 
-        ExpenseValidator validator = new ExpenseValidator();
-        ValidationResult validationResult = await validator.ValidateAsync(expense);
-        if (!validationResult.IsValid)
-        {
-            return ValidationProblem(validationResult.ToString());
-        }
-
-        await _dbContext.Expenses.AddAsync(expense);
+        _dbContext.Expenses.Add(expense);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(expense);
+        return Ok(new ExpenseResponse(expense));
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Expense>> Update(int id, UpdateExpenseDto updateExpenseDto)
+    public async Task<ActionResult<ExpenseResponse>> Update(int id, UpdateExpenseDto updateExpenseDto)
     {
         Expense? expense = await _dbContext.Expenses.FindAsync(id);
         if (expense is null)
@@ -60,17 +55,10 @@ public class ExpenseController : ApiControllerBase
         expense.MethodId = updateExpenseDto.MethodId;
         expense.UpdatedDate = DateTime.Now;
 
-        ExpenseValidator validator = new ExpenseValidator();
-        ValidationResult validationResult = await validator.ValidateAsync(expense);
-        if (!validationResult.IsValid)
-        {
-            return ValidationProblem(validationResult.ToString());
-        }
-
         _dbContext.Expenses.Update(expense);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(expense);
+        return Ok(new ExpenseResponse(expense));
     }
 
     [HttpDelete("{id}")]
@@ -89,7 +77,7 @@ public class ExpenseController : ApiControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<Expense>> GetById(int id)
+    public async Task<ActionResult<ExpenseResponse>> GetById(int id)
     {
         Expense? expense = await _dbContext.Expenses.FindAsync(id);
         if (expense is null)
@@ -97,12 +85,15 @@ public class ExpenseController : ApiControllerBase
             return NotFound($"Expense with id {id} not found!");
         }
 
-        return Ok(expense);
+        return Ok(new ExpenseResponse(expense));
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<Expense>>> GetAll()
+    public async Task<ActionResult<List<ExpenseResponse>>> GetAll()
     {
-        return Ok(await _dbContext.Expenses.ToListAsync());
+        List<Expense> expenses = await _dbContext.Expenses.ToListAsync();
+        List<ExpenseResponse> responses = expenses.Select(expense => new ExpenseResponse(expense)).ToList();
+        
+        return Ok(responses);
     }
 }

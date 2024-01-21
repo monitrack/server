@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using server.Context;
 using server.Dtos.UserCategory;
 using server.Models;
+using server.Responses.UserCategory;
 
 namespace Server.Controllers;
 
@@ -16,7 +17,7 @@ public class UserCategoryController : ApiControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<UserCategory>> Create(CreateUserCategoryDto userCategoryDto)
+    public async Task<ActionResult<UserCategoryResponse>> Create(CreateUserCategoryDto userCategoryDto)
     {
         DateTime now = DateTime.Now;
         UserCategory userCategory = new UserCategory
@@ -27,14 +28,14 @@ public class UserCategoryController : ApiControllerBase
             UpdatedDate = now
         };
 
-        await _dbContext.UserCategories.AddAsync(userCategory);
+        _dbContext.UserCategories.Add(userCategory);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(userCategory);
+        return Ok(new UserCategoryResponse(userCategory));
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<UserCategory>> Update(int id, UpdateUserCategoryDto userCategoryDto)
+    public async Task<ActionResult<UserCategoryResponse>> Update(int id, UpdateUserCategoryDto userCategoryDto)
     {
         UserCategory? userCategory = await _dbContext.UserCategories.FindAsync(id);
         if (userCategory is null)
@@ -48,7 +49,7 @@ public class UserCategoryController : ApiControllerBase
         _dbContext.UserCategories.Update(userCategory);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(userCategory);
+        return Ok(new UserCategoryResponse(userCategory));
     }
 
     [HttpDelete("{id}")]
@@ -67,7 +68,7 @@ public class UserCategoryController : ApiControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<UserCategory>> GetById(int id)
+    public async Task<ActionResult<UserCategoryResponse>> GetById(int id)
     {
         UserCategory? userCategory = await _dbContext.UserCategories.FindAsync(id);
         if (userCategory is null)
@@ -75,12 +76,16 @@ public class UserCategoryController : ApiControllerBase
             return NotFound($"User category with id {id} not found!");
         }
 
-        return Ok(userCategory);
+        return Ok(new UserCategoryResponse(userCategory));
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<UserCategory>>> GetAll()
+    public async Task<ActionResult<List<UserCategoryResponse>>> GetAll()
     {
+        List<UserCategory> userCategories = await _dbContext.UserCategories.ToListAsync();
+        List<UserCategoryResponse> userCategoryResponses =
+            userCategories.Select(uc => new UserCategoryResponse(uc)).ToList();
+
         return Ok(await _dbContext.UserCategories.ToListAsync());
     }
 }
