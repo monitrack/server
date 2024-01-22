@@ -8,9 +8,15 @@ public class Expense : BaseEntity
 
     public string? Note { get; set; }
 
-    public string Category { get; set; } = null!;
+    public required int CategoryId { get; set; }
+
+    public required string CategoryType { get; set; }
 
     public int MethodId { get; set; }
 
-    public Method Method { get; set; } = null!;
+#nullable disable
+
+    public Category Category { get; set; }
+
+    public Method Method { get; set; }
 }

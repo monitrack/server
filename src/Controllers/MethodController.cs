@@ -1,23 +1,24 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Context;
+using server.Dtos.Method;
 using server.Models;
 
 namespace Server.Controllers;
 
 public class MethodController : ApiControllerBase
 {
-    private MoniTrackContext _context; 
+    private readonly ApplicationDbContext _dbContext; 
     
-    public MethodController()
+    public MethodController(ApplicationDbContext dbContext)
     {
-        _context = new MoniTrackContext();
+        _dbContext = dbContext;
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<Method>> Get(int id)
     {
-        Method? method = await _context.Method.FirstOrDefaultAsync(x => x.Id == id);
+        Method? method = await _dbContext.Methods.FirstOrDefaultAsync(x => x.Id == id);
 
         if (method is null)
         {
@@ -28,15 +29,15 @@ public class MethodController : ApiControllerBase
     }
     
     [HttpPost]
-    public async Task<ActionResult<Method>> Create([FromBody] Method method)
+    public async Task<ActionResult<Method>> Create(CreateMethodDto createMethodDto)
     {
-        Method newMethod = new Method()
+        Method newMethod = new Method
         {
-            Name = method.Name
+            Name = createMethodDto.Name
         };
-        
-        await _context.AddAsync(newMethod);
-        await _context.SaveChangesAsync();
+
+        await _dbContext.AddAsync(newMethod);
+        await _dbContext.SaveChangesAsync();
 
         return Ok();
     }

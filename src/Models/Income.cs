@@ -7,9 +7,13 @@ public class Income : BaseEntity
     public required DateTime Date { get; set; }
 
     public string? Note { get; set; }
-    
-    public string Category { get; set; } = null!;
-    
+
+    public required int CategoryId { get; set; }
+
+    public required string CategoryType { get; set; }
+
+    public Category Category { get; set; } = null!;
+
     public int MethodId { get; set; }
 
     public Method Method { get; set; } = null!;
