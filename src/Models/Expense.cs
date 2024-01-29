@@ -12,11 +12,9 @@ public class Expense : BaseEntity
 
     public required string CategoryType { get; set; }
 
-    public int MethodId { get; set; }
+    public int AccountId { get; set; }
 
 #nullable disable
 
-    public Category Category { get; set; }
-
-    public Method Method { get; set; }
+    public Account Account { get; set; }
 }

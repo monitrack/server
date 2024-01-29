@@ -16,17 +16,11 @@ public class IncomeResponse
 
     public string CategoryType { get; set; }
 
-    public int MethodId { get; set; }
+    public int AccountId { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
     public DateTime UpdatedDate { get; set; }
-
-#nullable disable
-
-    public Models.Category Category { get; set; }
-
-    public Method Method { get; set; }
 
     public IncomeResponse(Models.Income income)
     {
@@ -36,7 +30,7 @@ public class IncomeResponse
         Note = income.Note;
         CategoryId = income.CategoryId;
         CategoryType = income.CategoryType;
-        MethodId = income.MethodId;
+        AccountId = income.AccountId;
         CreatedDate = income.CreatedDate;
         UpdatedDate = income.UpdatedDate;
     }

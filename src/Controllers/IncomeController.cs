@@ -19,6 +19,17 @@ public class IncomeController : ApiControllerBase
     [HttpPost]
     public async Task<ActionResult<IncomeResponse>> Create(CreateIncomeDto createIncomeDto)
     {
+        int accountId = createIncomeDto.AccountId;
+        // Todo: Extract into class
+        Account? account = await _dbContext.Accounts.FindAsync(accountId);
+        if (account is null)
+        {
+            return NotFound($"Account by id {accountId} not found!");
+        }
+
+        account.Balance += createIncomeDto.Amount;
+        _dbContext.Accounts.Update(account);
+
         DateTime now = DateTime.Now;
         Income income = new Income
         {
@@ -27,7 +38,7 @@ public class IncomeController : ApiControllerBase
             Note = createIncomeDto.Note,
             CategoryId = createIncomeDto.CategoryId,
             CategoryType = createIncomeDto.CategoryType,
-            MethodId = createIncomeDto.MethodId,
+            AccountId = createIncomeDto.AccountId,
             CreatedDate = now,
             UpdatedDate = now,
         };
@@ -47,12 +58,25 @@ public class IncomeController : ApiControllerBase
             return NotFound($"Income with id {id} not found!");
         }
 
+        // Todo: Extract into class
+        int accountId = updateIncomeDto.AccountId;
+        Account? account = await _dbContext.Accounts.FindAsync(accountId);
+        if (account is null)
+        {
+            return NotFound($"Account by id {accountId} not found!");
+        }
+
+        account.Balance -= updateIncomeDto.Amount;
+        decimal amountDifference = updateIncomeDto.Amount - income.Amount;
+        account.Balance += amountDifference;
+        _dbContext.Accounts.Update(account);
+
         income.Amount = updateIncomeDto.Amount;
         income.Date = updateIncomeDto.Date;
         income.Note = updateIncomeDto.Note;
         income.CategoryId = updateIncomeDto.CategoryId;
         income.CategoryType = updateIncomeDto.CategoryType;
-        income.MethodId = updateIncomeDto.MethodId;
+        income.AccountId = updateIncomeDto.AccountId;
         income.UpdatedDate = DateTime.Now;
 
         _dbContext.Incomes.Update(income);
@@ -70,6 +94,16 @@ public class IncomeController : ApiControllerBase
         {
             return NotFound();
         }
+
+        // Todo: Extract into class
+        int accountId = income.AccountId;
+        Account? account = await _dbContext.Accounts.FindAsync(accountId);
+        if (account is null)
+        {
+            return NotFound($"Account by id {accountId} not found!");
+        }
+
+        account.Balance -= income.Amount;
 
         _dbContext.Incomes.Remove(income);
         await _dbContext.SaveChangesAsync();

@@ -11,8 +11,8 @@ using server.Context;
 namespace server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240112063505_SeedCategories")]
-    partial class SeedCategories
+    [Migration("20240129162201_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,13 +20,23 @@ namespace server.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.9");
 
-            modelBuilder.Entity("server.Models.Category", b =>
+            modelBuilder.Entity("server.Models.Account", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -36,9 +46,12 @@ namespace server.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("server.Models.Expense", b =>
@@ -47,6 +60,9 @@ namespace server.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("AccountId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("Amount")
                         .HasColumnType("TEXT");
 
@@ -63,9 +79,6 @@ namespace server.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("MethodId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Note")
                         .HasColumnType("TEXT");
 
@@ -74,54 +87,12 @@ namespace server.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("MethodId");
+                    b.HasIndex("AccountId");
 
                     b.ToTable("Expenses");
                 });
 
-            modelBuilder.Entity("server.Models.Income", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("CategoryType")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("MethodId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedDate")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
-
-                    b.HasIndex("MethodId");
-
-                    b.ToTable("Incomes");
-                });
-
-            modelBuilder.Entity("server.Models.Method", b =>
+            modelBuilder.Entity("server.Models.GeneralCategory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -139,7 +110,45 @@ namespace server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Methods");
+                    b.ToTable("GeneralCategories");
+                });
+
+            modelBuilder.Entity("server.Models.Income", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CategoryType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("Incomes");
                 });
 
             modelBuilder.Entity("server.Models.User", b =>
@@ -213,60 +222,24 @@ namespace server.Migrations
 
             modelBuilder.Entity("server.Models.Expense", b =>
                 {
-                    b.HasOne("server.Models.Category", "Category")
-                        .WithMany("Expenses")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("server.Models.Method", "Method")
+                    b.HasOne("server.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("MethodId")
+                        .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("server.Models.UserCategory", null)
-                        .WithMany("Expenses");
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Method");
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("server.Models.Income", b =>
                 {
-                    b.HasOne("server.Models.Category", "Category")
-                        .WithMany("Incomes")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("server.Models.Method", "Method")
+                    b.HasOne("server.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("MethodId")
+                        .HasForeignKey("AccountId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("server.Models.UserCategory", null)
-                        .WithMany("Incomes");
-
-                    b.Navigation("Category");
-
-                    b.Navigation("Method");
-                });
-
-            modelBuilder.Entity("server.Models.Category", b =>
-                {
-                    b.Navigation("Expenses");
-
-                    b.Navigation("Incomes");
-                });
-
-            modelBuilder.Entity("server.Models.UserCategory", b =>
-                {
-                    b.Navigation("Expenses");
-
-                    b.Navigation("Incomes");
+                    b.Navigation("Account");
                 });
 #pragma warning restore 612, 618
         }

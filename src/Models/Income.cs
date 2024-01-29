@@ -12,9 +12,9 @@ public class Income : BaseEntity
 
     public required string CategoryType { get; set; }
 
-    public Category Category { get; set; } = null!;
+    public int AccountId { get; set; }
 
-    public int MethodId { get; set; }
+#nullable disable
 
-    public Method Method { get; set; } = null!;
+    public Account Account { get; set; }
 }

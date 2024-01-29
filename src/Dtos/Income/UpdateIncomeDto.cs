@@ -14,7 +14,7 @@ public class UpdateIncomeDto
 
     public required string CategoryType { get; set; }
 
-    public required int MethodId { get; set; }
+    public required int AccountId { get; set; }
 }
 
 public class UpdateIncomeDtoValidator : AbstractValidator<UpdateIncomeDto>
@@ -43,8 +43,8 @@ public class UpdateIncomeDtoValidator : AbstractValidator<UpdateIncomeDto>
             .NotEmpty()
             .WithMessage("Category type is required!");
 
-        RuleFor(income => income.MethodId)
+        RuleFor(income => income.AccountId)
             .NotEmpty()
-            .WithMessage("Method id is required!");
+            .WithMessage("Account id is required!");
     }
 }

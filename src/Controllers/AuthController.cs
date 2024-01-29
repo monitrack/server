@@ -40,6 +40,20 @@ public class AuthController : ApiControllerBase
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
 
+        // Todo: Extract into class
+        Account account = new Account
+        {
+            Name = "Main Account",
+            Balance = 0,
+            Currency = "USD",
+            UserId = user.Id,
+            CreatedDate = now,
+            UpdatedDate = now,
+        };
+
+        _dbContext.Accounts.Add(account);
+        await _dbContext.SaveChangesAsync();
+
         return Ok(new UserResponse(user));
     }
 
