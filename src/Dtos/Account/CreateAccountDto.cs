@@ -10,7 +10,7 @@ public class CreateAccountDto
 
     public required string Currency { get; set; }
 
-    public string? Description { get; set; } = null;
+    public string? Description { get; set; }
 
     public required int UserId { get; set; }
 }

@@ -8,7 +8,7 @@ public class UpdateExpenseDto
 
     public required DateTime Date { get; set; }
 
-    public string? Note { get; set; } = null;
+    public string? Note { get; set; }
 
     public required int CategoryId { get; set; }
 

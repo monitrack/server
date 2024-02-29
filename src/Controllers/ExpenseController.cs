@@ -21,14 +21,13 @@ public class ExpenseController : ApiControllerBase
     {
         int accountId = createExpenseDto.AccountId;
         // Todo: Extract into class
-        Account? account = await _dbContext.Accounts.FindAsync(accountId);
+        Account? account = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == accountId);
         if (account is null)
         {
             return NotFound($"Account by id {accountId} not found!");
         }
 
         account.Balance -= createExpenseDto.Amount;
-        _dbContext.Accounts.Update(account);
         
         DateTime now = DateTime.Now;
         Expense expense = new Expense
@@ -52,7 +51,7 @@ public class ExpenseController : ApiControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<ExpenseResponse>> Update(int id, UpdateExpenseDto updateExpenseDto)
     {
-        Expense? expense = await _dbContext.Expenses.FindAsync(id);
+        Expense? expense = await _dbContext.Expenses.FirstOrDefaultAsync(e => e.Id == id);
         if (expense is null)
         {
             return NotFound($"Expense with id {id} not found!");
@@ -60,7 +59,7 @@ public class ExpenseController : ApiControllerBase
 
         int accountId = updateExpenseDto.AccountId;
         // Todo: Extract into class
-        Account? account = await _dbContext.Accounts.FindAsync(accountId);
+        Account? account = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == accountId);
         if (account is null)
         {
             return NotFound($"Account by id {accountId} not found!");
@@ -68,7 +67,6 @@ public class ExpenseController : ApiControllerBase
 
         decimal amountDifference = updateExpenseDto.Amount - expense.Amount;
         account.Balance -= amountDifference;
-        _dbContext.Accounts.Update(account);
 
         expense.Amount = updateExpenseDto.Amount;
         expense.Date = updateExpenseDto.Date;
@@ -78,7 +76,6 @@ public class ExpenseController : ApiControllerBase
         expense.AccountId = accountId;
         expense.UpdatedDate = DateTime.Now;
 
-        _dbContext.Expenses.Update(expense);
         await _dbContext.SaveChangesAsync();
 
         return Ok(new ExpenseResponse(expense));
@@ -87,7 +84,7 @@ public class ExpenseController : ApiControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        Expense? expense = await _dbContext.Expenses.FindAsync(id);
+        Expense? expense = await _dbContext.Expenses.FirstOrDefaultAsync(e => e.Id == id);
         if (expense is null)
         {
             return NotFound($"Expense with id {id} not found!");
@@ -95,7 +92,7 @@ public class ExpenseController : ApiControllerBase
 
         // Todo: Extract into class
         int accountId = expense.AccountId;
-        Account? account = await _dbContext.Accounts.FindAsync(accountId);
+        Account? account = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == accountId);
         if (account is null)
         {
             return NotFound($"Account by id {accountId} not found!");
@@ -104,7 +101,6 @@ public class ExpenseController : ApiControllerBase
         account.Balance += expense.Amount;
 
         _dbContext.Expenses.Remove(expense);
-        _dbContext.Accounts.Update(account);
         await _dbContext.SaveChangesAsync();
 
         return Ok();
@@ -113,7 +109,7 @@ public class ExpenseController : ApiControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<ExpenseResponse>> GetById(int id)
     {
-        Expense? expense = await _dbContext.Expenses.FindAsync(id);
+        Expense? expense = await _dbContext.Expenses.FirstOrDefaultAsync(e => e.Id == id);
         if (expense is null)
         {
             return NotFound($"Expense with id {id} not found!");

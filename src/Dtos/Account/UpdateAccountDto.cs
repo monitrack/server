@@ -10,7 +10,7 @@ public class UpdateAccountDto
 
     public required string Currency { get; set; }
 
-    public string? Description { get; set; } = null;
+    public string? Description { get; set; }
 }
 
 public class UpdateAccountDtoValidator : AbstractValidator<CreateAccountDto>
@@ -21,7 +21,7 @@ public class UpdateAccountDtoValidator : AbstractValidator<CreateAccountDto>
             .NotEmpty()
             .WithMessage("Name is required!");
         RuleFor(account => account.Balance)
-            .NotEmpty()
+            .NotNull()
             .WithMessage("Balance is required!");
         RuleFor(account => account.Currency)
             .NotEmpty()

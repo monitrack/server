@@ -40,7 +40,7 @@ public class AccountController : ApiControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<AccountResponse>> Update(int id, UpdateAccountDto updateAccountDto)
     {
-        Account? account = await _dbContext.Accounts.FindAsync(id);
+        Account? account = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == id);
         if (account is null)
         {
             return NotFound($"Account with id {id} not found!");
@@ -52,7 +52,6 @@ public class AccountController : ApiControllerBase
         account.Description = updateAccountDto.Description;
         account.UpdatedDate = DateTime.Now;
 
-        _dbContext.Accounts.Update(account);
         await _dbContext.SaveChangesAsync();
 
         return Ok(new AccountResponse(account));
@@ -61,14 +60,11 @@ public class AccountController : ApiControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        Account? account = await _dbContext.Accounts.FindAsync(id);
-        if (account is null)
+        int rows = await _dbContext.Accounts.Where(a => a.Id == id).ExecuteDeleteAsync();
+        if (rows == 0)
         {
             return NotFound($"Account with id {id} not found!");
         }
-
-        _dbContext.Accounts.Remove(account);
-        await _dbContext.SaveChangesAsync();
 
         return Ok();
     }
@@ -76,7 +72,7 @@ public class AccountController : ApiControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<AccountResponse>> GetById(int id)
     {
-        Account? account = await _dbContext.Accounts.FindAsync(id);
+        Account? account = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == id);
         if (account is null)
         {
             return NotFound($"Account with id {id} not found!");
@@ -85,12 +81,12 @@ public class AccountController : ApiControllerBase
         return Ok(new AccountResponse(account));
     }
 
-    [HttpGet]
+    [HttpGet("users/accounts")]
     public async Task<ActionResult<List<AccountResponse>>> GetUserAccounts(int userId)
     {
-        List<Account> accounts = await _dbContext.Accounts.Where(account => account.UserId == userId).ToListAsync();
-        List<AccountResponse> responses = accounts.Select(account => new AccountResponse(account)).ToList();
-
-        return Ok(responses);
+        return await _dbContext.Accounts
+            .Where(account => account.UserId == userId)
+            .Select(account => new AccountResponse(account))
+            .ToListAsync();
     }
 }
