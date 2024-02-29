@@ -10,5 +10,7 @@ public class Account : BaseEntity
 
     public string? Description { get; set; }
 
-    public required int UserId { get; set; }
+    public int UserId { get; set; }
+
+    public User User { get; set; } = null!;
 }

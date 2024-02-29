@@ -19,13 +19,10 @@ public class UserCategoryController : ApiControllerBase
     [HttpPost]
     public async Task<ActionResult<UserCategoryResponse>> Create(CreateUserCategoryDto userCategoryDto)
     {
-        DateTime now = DateTime.Now;
         UserCategory userCategory = new UserCategory
         {
             UserId = userCategoryDto.UserId,
             Name = userCategoryDto.Name,
-            CreatedDate = now,
-            UpdatedDate = now
         };
 
         _dbContext.UserCategories.Add(userCategory);

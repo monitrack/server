@@ -29,7 +29,6 @@ public class ExpenseController : ApiControllerBase
 
         account.Balance -= createExpenseDto.Amount;
         
-        DateTime now = DateTime.Now;
         Expense expense = new Expense
         {
             Amount = createExpenseDto.Amount,
@@ -38,8 +37,6 @@ public class ExpenseController : ApiControllerBase
             CategoryId = createExpenseDto.CategoryId,
             CategoryType = createExpenseDto.CategoryType,
             AccountId = accountId,
-            CreatedDate = now,
-            UpdatedDate = now,
         };
 
         _dbContext.Expenses.Add(expense);

@@ -19,12 +19,8 @@ public class GeneralCategoryController : ApiControllerBase
     [HttpPost]
     public async Task<ActionResult<GeneralCategoryResponse>> Create(CreateGeneralCategoryDto createGeneralCategoryDto)
     {
-        DateTime now = DateTime.Now;
-        GeneralCategory generalCategory = new GeneralCategory
-        {
+        GeneralCategory generalCategory = new() {
             Name = createGeneralCategoryDto.Name,
-            CreatedDate = now,
-            UpdatedDate = now
         };
 
         _dbContext.GeneralCategories.Add(generalCategory);

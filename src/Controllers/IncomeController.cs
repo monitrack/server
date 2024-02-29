@@ -29,7 +29,6 @@ public class IncomeController : ApiControllerBase
 
         account.Balance += createIncomeDto.Amount;
 
-        DateTime now = DateTime.Now;
         Income income = new Income
         {
             Amount = createIncomeDto.Amount,
@@ -38,8 +37,6 @@ public class IncomeController : ApiControllerBase
             CategoryId = createIncomeDto.CategoryId,
             CategoryType = createIncomeDto.CategoryType,
             AccountId = createIncomeDto.AccountId,
-            CreatedDate = now,
-            UpdatedDate = now,
         };
 
         _dbContext.Incomes.Add(income);

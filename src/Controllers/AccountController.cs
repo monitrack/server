@@ -19,7 +19,6 @@ public class AccountController : ApiControllerBase
     [HttpPost]
     public async Task<ActionResult<AccountResponse>> Create(CreateAccountDto createAccountDto)
     {
-        DateTime now = DateTime.Now;
         Account account = new Account
         {
             Name = createAccountDto.Name,
@@ -27,8 +26,6 @@ public class AccountController : ApiControllerBase
             Currency = createAccountDto.Currency,
             Description = createAccountDto.Description,
             UserId = createAccountDto.UserId,
-            CreatedDate = now,
-            UpdatedDate = now,
         };
 
         _dbContext.Accounts.Add(account);
