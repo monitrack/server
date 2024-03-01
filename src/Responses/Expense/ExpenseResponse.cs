@@ -16,17 +16,11 @@ public class ExpenseResponse
 
     public string CategoryType { get; set; }
 
-    public int MethodId { get; set; }
+    public int AccountId { get; set; }
 
     public DateTime CreatedDate { get; set; }
 
     public DateTime UpdatedDate { get; set; }
-
-#nullable disable
-
-    public Models.Category Category { get; set; }
-
-    public Method Method { get; set; }
 
     public ExpenseResponse(Models.Expense expense)
     {
@@ -36,7 +30,7 @@ public class ExpenseResponse
         Note = expense.Note;
         CategoryId = expense.CategoryId;
         CategoryType = expense.CategoryType;
-        MethodId = expense.MethodId;
+        AccountId = expense.AccountId;
         CreatedDate = expense.CreatedDate;
         UpdatedDate = expense.UpdatedDate;
     }

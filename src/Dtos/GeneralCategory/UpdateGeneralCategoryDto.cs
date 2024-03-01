@@ -1,13 +1,13 @@
 using FluentValidation;
 
-namespace server.Dtos.Category;
+namespace server.Dtos.GeneralCategory;
 
-public class UpdateCategoryDto
+public class UpdateGeneralCategoryDto
 {
     public required string Name { get; set; }
 }
 
-public class UpdateCategoryDtoValidator : AbstractValidator<UpdateCategoryDto>
+public class UpdateCategoryDtoValidator : AbstractValidator<UpdateGeneralCategoryDto>
 {
     public UpdateCategoryDtoValidator()
     {

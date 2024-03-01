@@ -19,13 +19,10 @@ public class UserCategoryController : ApiControllerBase
     [HttpPost]
     public async Task<ActionResult<UserCategoryResponse>> Create(CreateUserCategoryDto userCategoryDto)
     {
-        DateTime now = DateTime.Now;
         UserCategory userCategory = new UserCategory
         {
             UserId = userCategoryDto.UserId,
             Name = userCategoryDto.Name,
-            CreatedDate = now,
-            UpdatedDate = now
         };
 
         _dbContext.UserCategories.Add(userCategory);
@@ -37,7 +34,7 @@ public class UserCategoryController : ApiControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<UserCategoryResponse>> Update(int id, UpdateUserCategoryDto userCategoryDto)
     {
-        UserCategory? userCategory = await _dbContext.UserCategories.FindAsync(id);
+        UserCategory? userCategory = await _dbContext.UserCategories.FirstOrDefaultAsync(u => u.Id == id);
         if (userCategory is null)
         {
             return NotFound($"User category with id {id} not found!");
@@ -46,7 +43,6 @@ public class UserCategoryController : ApiControllerBase
         userCategory.Name = userCategoryDto.Name;
         userCategory.UpdatedDate = DateTime.Now;
 
-        _dbContext.UserCategories.Update(userCategory);
         await _dbContext.SaveChangesAsync();
 
         return Ok(new UserCategoryResponse(userCategory));
@@ -55,14 +51,11 @@ public class UserCategoryController : ApiControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        UserCategory? userCategory = await _dbContext.UserCategories.FindAsync(id);
-        if (userCategory is null)
+        int rows = await _dbContext.UserCategories.Where(u => u.Id == id).ExecuteDeleteAsync();
+        if (rows == 0)
         {
             return NotFound($"User category with id {id} not found!");
         }
-
-        _dbContext.UserCategories.Remove(userCategory);
-        await _dbContext.SaveChangesAsync();
 
         return Ok();
     }
@@ -70,7 +63,7 @@ public class UserCategoryController : ApiControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<UserCategoryResponse>> GetById(int id)
     {
-        UserCategory? userCategory = await _dbContext.UserCategories.FindAsync(id);
+        UserCategory? userCategory = await _dbContext.UserCategories.FirstOrDefaultAsync(u => u.Id == id);
         if (userCategory is null)
         {
             return NotFound($"User category with id {id} not found!");

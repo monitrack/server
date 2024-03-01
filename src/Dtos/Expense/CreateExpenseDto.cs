@@ -8,13 +8,13 @@ public class CreateExpenseDto
 
     public required DateTime Date { get; set; }
 
-    public string? Note { get; set; } = null;
+    public string? Note { get; set; }
 
     public required int CategoryId { get; set; }
 
     public required string CategoryType { get; set; }
 
-    public required int MethodId { get; set; }
+    public required int AccountId { get; set; }
 }
 
 public class CreateExpenseDtoValidator : AbstractValidator<CreateExpenseDto>
@@ -38,8 +38,8 @@ public class CreateExpenseDtoValidator : AbstractValidator<CreateExpenseDto>
         RuleFor(expense => expense.CategoryType)
             .NotEmpty()
             .WithMessage("Category type is required!");
-        RuleFor(expense => expense.MethodId)
+        RuleFor(expense => expense.AccountId)
             .NotEmpty()
-            .WithMessage("Method id is required!");
+            .WithMessage("Account id is required!");
     }
 }

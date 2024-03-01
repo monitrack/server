@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using server.Context;
 using server.Dtos;
 using server.Dtos.User;
+using server.Extensions;
 using server.Models;
 using server.Responses.User;
 using server.Services;
@@ -24,15 +25,21 @@ public class AuthController : ApiControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<UserResponse>> Register(CreateUserDto createUserDto)
     {
-        DateTime now = DateTime.Now;
-        User user = new User
+        User user = new()
         {
             Name = createUserDto.Name,
             Email = createUserDto.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(createUserDto.Password),
             EmailConfirmationToken = "Token", // todo
-            CreatedDate = now,
-            UpdatedDate = now,
+            Accounts = new List<Account>
+            {
+                new()
+                {
+                    Name = "Main Account",
+                    Balance = 0,
+                    Currency = "USD",
+                }
+            }
         };
 
         SendEmailConfirmationAsync(user);
@@ -40,7 +47,7 @@ public class AuthController : ApiControllerBase
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
 
-        return Ok(new UserResponse(user));
+        return Ok(user.MapToResponse());
     }
 
     [HttpPost("login")]
@@ -57,7 +64,7 @@ public class AuthController : ApiControllerBase
             return ValidationProblem("Wrong password!");
         }
 
-        return Ok(new UserResponse(user));
+        return Ok(user.MapToResponse());
     }
 
     [HttpGet("confirm-email/{userId}/{token}")]
@@ -72,9 +79,9 @@ public class AuthController : ApiControllerBase
         user.EmailConfirmedDate = DateTime.Now;
         await _dbContext.SaveChangesAsync();
 
-        return Ok(new UserResponse(user));
+        return Ok(user.MapToResponse());
     }
-    
+
     [HttpPost("forgot-password")]
     public async Task<ActionResult<UserResponse>> ForgotPassword(string email)
     {
@@ -87,16 +94,18 @@ public class AuthController : ApiControllerBase
         user.PasswordResetToken = "Token";
         user.EmailConfirmedDate = DateTime.Now;
         await _dbContext.SaveChangesAsync();
-        
+
         // todo send to email
 
-        return Ok(new UserResponse(user));
+        return Ok(user.MapToResponse());
     }
-    
+
     [HttpPost("reset-password")]
     public async Task<ActionResult<UserResponse>> ResetPassword(ResetUserPasswordDto userDto)
     {
-        User? user = await _dbContext.Users.FirstOrDefaultAsync(use => use.PasswordResetToken == userDto.PasswordResetToken);
+        User? user = await _dbContext.Users.FirstOrDefaultAsync(
+            use => use.PasswordResetToken == userDto.PasswordResetToken
+        );
         if (user is null || user.PasswordResetTokenExpirationDate < DateTime.Now)
         {
             return NotFound("Invalid token!");
@@ -107,7 +116,7 @@ public class AuthController : ApiControllerBase
         user.PasswordResetTokenExpirationDate = null;
         await _dbContext.SaveChangesAsync();
 
-        return Ok(new UserResponse(user));
+        return Ok(user.MapToResponse());
     }
 
     private async void SendEmailConfirmationAsync(User user)

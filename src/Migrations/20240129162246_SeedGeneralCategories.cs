@@ -4,7 +4,7 @@
 
 namespace server.Migrations
 {
-    public partial class SeedCategories : Migration
+    public partial class SeedGeneralCategories : Migration
     {
         private string[] categories = new[]
         {
@@ -31,7 +31,7 @@ namespace server.Migrations
             foreach (var categoryName in categories)
             {
                 migrationBuilder.InsertData(
-                    table: "Categories",
+                    table: "GeneralCategories",
                     columns: new[] { "Name", "CreatedDate", "UpdatedDate" },
                     values: new object[] { categoryName, DateTime.UtcNow, DateTime.UtcNow }
                 );
@@ -43,7 +43,7 @@ namespace server.Migrations
             foreach (var categoryName in categories)
             {
                 migrationBuilder.DeleteData(
-                    table: "Categories",
+                    table: "GeneralCategories",
                     keyColumn: "Name",
                     keyValue: categoryName
                 );
