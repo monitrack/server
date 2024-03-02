@@ -11,17 +11,8 @@ using server.Services;
 
 namespace Server.Controllers;
 
-public class AuthController : ApiControllerBase
+public class AuthController(ApplicationDbContext dbContext, IEmailService emailService) : ApiControllerBase
 {
-    private readonly ApplicationDbContext _dbContext;
-    private readonly IEmailService _emailService;
-
-    public AuthController(ApplicationDbContext dbContext, IEmailService emailService)
-    {
-        _dbContext = dbContext;
-        _emailService = emailService;
-    }
-
     [HttpPost("register")]
     public async Task<ActionResult<UserResponse>> Register(CreateUserDto createUserDto)
     {
@@ -44,8 +35,8 @@ public class AuthController : ApiControllerBase
 
         SendEmailConfirmationAsync(user);
 
-        _dbContext.Users.Add(user);
-        await _dbContext.SaveChangesAsync();
+        dbContext.Users.Add(user);
+        await dbContext.SaveChangesAsync();
 
         return Ok(user.MapToResponse());
     }
@@ -53,7 +44,7 @@ public class AuthController : ApiControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<UserResponse>> Login(LoginUserDto userDto)
     {
-        User? user = await _dbContext.Users.FirstOrDefaultAsync(user => user.Email == userDto.Email);
+        User? user = await dbContext.Users.FirstOrDefaultAsync(user => user.Email == userDto.Email);
         if (user is null)
         {
             return NotFound($"User with email {userDto.Email} not found!");
@@ -70,14 +61,14 @@ public class AuthController : ApiControllerBase
     [HttpGet("confirm-email/{userId}/{token}")]
     public async Task<ActionResult<UserResponse>> ConfirmEmail(string userId, string token)
     {
-        User? user = await _dbContext.Users.SingleOrDefaultAsync(user => user.EmailConfirmationToken == token);
+        User? user = await dbContext.Users.SingleOrDefaultAsync(user => user.EmailConfirmationToken == token);
         if (user is null)
         {
             return NotFound("Invalid token!");
         }
 
         user.EmailConfirmedDate = DateTime.Now;
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         return Ok(user.MapToResponse());
     }
@@ -85,7 +76,7 @@ public class AuthController : ApiControllerBase
     [HttpPost("forgot-password")]
     public async Task<ActionResult<UserResponse>> ForgotPassword(string email)
     {
-        User? user = await _dbContext.Users.FirstOrDefaultAsync(use => use.EmailConfirmationToken == email);
+        User? user = await dbContext.Users.FirstOrDefaultAsync(use => use.EmailConfirmationToken == email);
         if (user is null)
         {
             return NotFound($"User with email {email} not found!");
@@ -93,7 +84,7 @@ public class AuthController : ApiControllerBase
 
         user.PasswordResetToken = "Token";
         user.EmailConfirmedDate = DateTime.Now;
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         // todo send to email
 
@@ -103,7 +94,7 @@ public class AuthController : ApiControllerBase
     [HttpPost("reset-password")]
     public async Task<ActionResult<UserResponse>> ResetPassword(ResetUserPasswordDto userDto)
     {
-        User? user = await _dbContext.Users.FirstOrDefaultAsync(
+        User? user = await dbContext.Users.FirstOrDefaultAsync(
             use => use.PasswordResetToken == userDto.PasswordResetToken
         );
         if (user is null || user.PasswordResetTokenExpirationDate < DateTime.Now)
@@ -114,7 +105,7 @@ public class AuthController : ApiControllerBase
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
         user.PasswordResetToken = null;
         user.PasswordResetTokenExpirationDate = null;
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         return Ok(user.MapToResponse());
     }
@@ -133,6 +124,6 @@ public class AuthController : ApiControllerBase
             Body = body
         };
 
-        await _emailService.SendAsync(emailDto);
+        await emailService.SendAsync(emailDto);
     }
 }

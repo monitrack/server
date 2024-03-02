@@ -7,15 +7,8 @@ using server.Responses.GeneralCategory;
 
 namespace Server.Controllers;
 
-public class GeneralCategoryController : ApiControllerBase
+public class GeneralCategoryController(ApplicationDbContext dbContext) : ApiControllerBase
 {
-    private readonly ApplicationDbContext _dbContext;
-
-    public GeneralCategoryController(ApplicationDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     [HttpPost]
     public async Task<ActionResult<GeneralCategoryResponse>> Create(CreateGeneralCategoryDto createGeneralCategoryDto)
     {
@@ -23,8 +16,8 @@ public class GeneralCategoryController : ApiControllerBase
             Name = createGeneralCategoryDto.Name,
         };
 
-        _dbContext.GeneralCategories.Add(generalCategory);
-        await _dbContext.SaveChangesAsync();
+        dbContext.GeneralCategories.Add(generalCategory);
+        await dbContext.SaveChangesAsync();
 
         return Ok(new GeneralCategoryResponse(generalCategory));
     }
@@ -32,7 +25,7 @@ public class GeneralCategoryController : ApiControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<GeneralCategoryResponse>> Update(int id, UpdateGeneralCategoryDto updateGeneralCategoryDto)
     {
-        GeneralCategory? category = await _dbContext.GeneralCategories.FirstOrDefaultAsync(g => g.Id == id);
+        GeneralCategory? category = await dbContext.GeneralCategories.FirstOrDefaultAsync(g => g.Id == id);
         if (category is null)
         {
             return NotFound($"Category with id {id} not found!");
@@ -41,7 +34,7 @@ public class GeneralCategoryController : ApiControllerBase
         category.Name = updateGeneralCategoryDto.Name;
         category.UpdatedDate = DateTime.Now;
 
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         return Ok(new GeneralCategoryResponse(category));
     }
@@ -49,7 +42,7 @@ public class GeneralCategoryController : ApiControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        int rows = await _dbContext.GeneralCategories.Where(g => g.Id == id).ExecuteDeleteAsync();
+        int rows = await dbContext.GeneralCategories.Where(g => g.Id == id).ExecuteDeleteAsync();
         if (rows == 0)
         {
             return NotFound($"Category with id {id} not found!");
@@ -61,7 +54,7 @@ public class GeneralCategoryController : ApiControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<GeneralCategoryResponse>> GetById(int id)
     {
-        GeneralCategory? category = await _dbContext.GeneralCategories.FirstOrDefaultAsync(g => g.Id == id);
+        GeneralCategory? category = await dbContext.GeneralCategories.FirstOrDefaultAsync(g => g.Id == id);
         if (category is null)
         {
             return NotFound($"Category with id {id} not found!");
@@ -73,7 +66,7 @@ public class GeneralCategoryController : ApiControllerBase
     [HttpGet]
     public async Task<ActionResult<List<GeneralCategoryResponse>>> GetAll()
     {
-        List<GeneralCategory> categories = await _dbContext.GeneralCategories.ToListAsync();
+        List<GeneralCategory> categories = await dbContext.GeneralCategories.ToListAsync();
         List<GeneralCategoryResponse> responses = categories.Select(category => new GeneralCategoryResponse(category)).ToList();
 
         return Ok(responses);

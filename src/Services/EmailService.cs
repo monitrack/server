@@ -7,14 +7,9 @@ using server.Dtos;
 
 namespace server.Services;
 
-public class EmailService : IEmailService
+public class EmailService(IOptions<EmailSettings> emailSettings) : IEmailService
 {
-    private readonly EmailSettings _emailSettings;
-
-    public EmailService(IOptions<EmailSettings> emailSettings)
-    {
-        _emailSettings = emailSettings.Value;
-    }
+    private readonly EmailSettings _emailSettings = emailSettings.Value;
 
     public async Task SendAsync(EmailDto emailDto)
     {
