@@ -7,15 +7,8 @@ using server.Responses.UserCategory;
 
 namespace Server.Controllers;
 
-public class UserCategoryController : ApiControllerBase
+public class UserCategoryController(ApplicationDbContext dbContext) : ApiControllerBase
 {
-    private readonly ApplicationDbContext _dbContext;
-
-    public UserCategoryController(ApplicationDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     [HttpPost]
     public async Task<ActionResult<UserCategoryResponse>> Create(CreateUserCategoryDto userCategoryDto)
     {
@@ -25,8 +18,8 @@ public class UserCategoryController : ApiControllerBase
             Name = userCategoryDto.Name,
         };
 
-        _dbContext.UserCategories.Add(userCategory);
-        await _dbContext.SaveChangesAsync();
+        dbContext.UserCategories.Add(userCategory);
+        await dbContext.SaveChangesAsync();
 
         return Ok(new UserCategoryResponse(userCategory));
     }
@@ -34,7 +27,7 @@ public class UserCategoryController : ApiControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<UserCategoryResponse>> Update(int id, UpdateUserCategoryDto userCategoryDto)
     {
-        UserCategory? userCategory = await _dbContext.UserCategories.FirstOrDefaultAsync(u => u.Id == id);
+        UserCategory? userCategory = await dbContext.UserCategories.FirstOrDefaultAsync(u => u.Id == id);
         if (userCategory is null)
         {
             return NotFound($"User category with id {id} not found!");
@@ -43,7 +36,7 @@ public class UserCategoryController : ApiControllerBase
         userCategory.Name = userCategoryDto.Name;
         userCategory.UpdatedDate = DateTime.Now;
 
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         return Ok(new UserCategoryResponse(userCategory));
     }
@@ -51,7 +44,7 @@ public class UserCategoryController : ApiControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        int rows = await _dbContext.UserCategories.Where(u => u.Id == id).ExecuteDeleteAsync();
+        int rows = await dbContext.UserCategories.Where(u => u.Id == id).ExecuteDeleteAsync();
         if (rows == 0)
         {
             return NotFound($"User category with id {id} not found!");
@@ -63,7 +56,7 @@ public class UserCategoryController : ApiControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<UserCategoryResponse>> GetById(int id)
     {
-        UserCategory? userCategory = await _dbContext.UserCategories.FirstOrDefaultAsync(u => u.Id == id);
+        UserCategory? userCategory = await dbContext.UserCategories.FirstOrDefaultAsync(u => u.Id == id);
         if (userCategory is null)
         {
             return NotFound($"User category with id {id} not found!");
@@ -75,10 +68,10 @@ public class UserCategoryController : ApiControllerBase
     [HttpGet]
     public async Task<ActionResult<List<UserCategoryResponse>>> GetAll()
     {
-        List<UserCategory> userCategories = await _dbContext.UserCategories.ToListAsync();
+        List<UserCategory> userCategories = await dbContext.UserCategories.ToListAsync();
         List<UserCategoryResponse> userCategoryResponses =
             userCategories.Select(uc => new UserCategoryResponse(uc)).ToList();
 
-        return Ok(await _dbContext.UserCategories.ToListAsync());
+        return Ok(await dbContext.UserCategories.ToListAsync());
     }
 }

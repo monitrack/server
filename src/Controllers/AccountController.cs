@@ -7,15 +7,8 @@ using server.Responses.Account;
 
 namespace Server.Controllers;
 
-public class AccountController : ApiControllerBase
+public class AccountController(ApplicationDbContext dbContext) : ApiControllerBase
 {
-    private readonly ApplicationDbContext _dbContext;
-
-    public AccountController(ApplicationDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     [HttpPost]
     public async Task<ActionResult<AccountResponse>> Create(CreateAccountDto createAccountDto)
     {
@@ -28,8 +21,8 @@ public class AccountController : ApiControllerBase
             UserId = createAccountDto.UserId,
         };
 
-        _dbContext.Accounts.Add(account);
-        await _dbContext.SaveChangesAsync();
+        dbContext.Accounts.Add(account);
+        await dbContext.SaveChangesAsync();
 
         return Ok(new AccountResponse(account));
     }
@@ -37,7 +30,7 @@ public class AccountController : ApiControllerBase
     [HttpPut("{id}")]
     public async Task<ActionResult<AccountResponse>> Update(int id, UpdateAccountDto updateAccountDto)
     {
-        Account? account = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == id);
+        Account? account = await dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == id);
         if (account is null)
         {
             return NotFound($"Account with id {id} not found!");
@@ -49,7 +42,7 @@ public class AccountController : ApiControllerBase
         account.Description = updateAccountDto.Description;
         account.UpdatedDate = DateTime.Now;
 
-        await _dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync();
 
         return Ok(new AccountResponse(account));
     }
@@ -57,7 +50,7 @@ public class AccountController : ApiControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id)
     {
-        int rows = await _dbContext.Accounts.Where(a => a.Id == id).ExecuteDeleteAsync();
+        int rows = await dbContext.Accounts.Where(a => a.Id == id).ExecuteDeleteAsync();
         if (rows == 0)
         {
             return NotFound($"Account with id {id} not found!");
@@ -69,7 +62,7 @@ public class AccountController : ApiControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<AccountResponse>> GetById(int id)
     {
-        Account? account = await _dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == id);
+        Account? account = await dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == id);
         if (account is null)
         {
             return NotFound($"Account with id {id} not found!");
@@ -81,7 +74,7 @@ public class AccountController : ApiControllerBase
     [HttpGet("users/accounts")]
     public async Task<ActionResult<List<AccountResponse>>> GetUserAccounts(int userId)
     {
-        return await _dbContext.Accounts
+        return await dbContext.Accounts
             .Where(account => account.UserId == userId)
             .Select(account => new AccountResponse(account))
             .ToListAsync();
