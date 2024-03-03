@@ -12,6 +12,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Income> Incomes { get; set; }
     public DbSet<Expense> Expenses { get; set; }
     public DbSet<Account> Accounts { get; set; }
+    public DbSet<Transfer> Transfers { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
