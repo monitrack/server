@@ -65,6 +65,7 @@ public class TransferController(ApplicationDbContext dbContext) : ApiControllerB
         return Ok();
     }
 
+    [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
         Transfer? transfer = await dbContext.Transfers.FirstOrDefaultAsync(t => t.Id == id);
