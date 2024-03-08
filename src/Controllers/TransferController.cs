@@ -12,6 +12,10 @@ public class TransferController(ApplicationDbContext dbContext) : ApiControllerB
     [HttpPost]
     public async Task<ActionResult> Create(CreateTransferDto transferDto)
     {
+        decimal transferAmount = transferDto.Amount;
+        int accountFromId = transferDto.AccountFromId;
+        int accountToId = transferDto.AccountToId;
+
         Transfer transfer = new()
         {
             Amount = transferDto.Amount,
@@ -20,6 +24,21 @@ public class TransferController(ApplicationDbContext dbContext) : ApiControllerB
             Description = transferDto.Description,
             Date = transferDto.Date
         };
+
+        Account? accountFrom = await dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == accountFromId);
+        if (accountFrom is null)
+        {
+            return NotFound($"Account from by id {accountFromId} not found!");
+        }
+
+        Account? accountTo = await dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == accountToId);
+        if (accountTo is null)
+        {
+            return NotFound($"Account to by id {accountTo} not found!");
+        }
+
+        accountFrom.Balance -= transferAmount;
+        accountTo.Balance += transferAmount;
 
         dbContext.Transfers.Add(transfer);
         await dbContext.SaveChangesAsync();
@@ -30,13 +49,39 @@ public class TransferController(ApplicationDbContext dbContext) : ApiControllerB
     [HttpPut("{id}")]
     public async Task<ActionResult> Update(int id, UpdateTransferDto transferDto)
     {
+        decimal newTransferAmount = transferDto.Amount;
+        int accountFromId = transferDto.AccountFromId;
+        int accountToId = transferDto.AccountToId;
+
         Transfer? transfer = await dbContext.Transfers.FirstOrDefaultAsync(t => t.Id == id);
         if (transfer is null)
         {
             return NotFound($"Transfer with id {id} not found!");
         }
 
-        // todo update account balance
+        Account? accountFrom = await dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == accountFromId);
+        if (accountFrom is null)
+        {
+            return NotFound($"Account from by id {accountFromId} not found!");
+        }
+
+        Account? accountTo = await dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == accountToId);
+        if (accountTo is null)
+        {
+            return NotFound($"Account to by id {accountTo} not found!");
+        }
+
+        if (newTransferAmount > transfer.Amount)
+        {
+            accountFrom.Balance -= newTransferAmount;
+            accountTo.Balance += newTransferAmount;
+        }
+        else
+        {
+            accountFrom.Balance += newTransferAmount;
+            accountTo.Balance -= newTransferAmount;
+        }
+
         // todo validate account ids (user should only transfer to his accounts)
         // todo if user changes accounts, then we should update account balance    
 
@@ -54,13 +99,30 @@ public class TransferController(ApplicationDbContext dbContext) : ApiControllerB
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        int rows = await dbContext.Transfers.Where(t => t.Id == id).ExecuteDeleteAsync();
-        if (rows == 0)
+        Transfer? transfer = await dbContext.Transfers.FirstOrDefaultAsync(t => t.Id == id);
+        if (transfer == null)
         {
             return NotFound($"Transfer with id {id} not found!");
         }
 
-        // todo update account balance
+        decimal transferAmount = transfer.Amount;
+
+        Account? accountFrom = await dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == transfer.AccountFromId);
+        if (accountFrom is null)
+        {
+            return NotFound($"Account from by id {transfer.AccountFromId} not found!");
+        }
+
+        Account? accountTo = await dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == transfer.AccountToId);
+        if (accountTo is null)
+        {
+            return NotFound($"Account from by id {accountTo} not found!");
+        }
+
+        accountFrom.Balance -= transfer.Amount;
+        accountTo.Balance += transferAmount;
+
+        await dbContext.SaveChangesAsync();
 
         return Ok();
     }
