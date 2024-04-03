@@ -2,40 +2,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using server.Context;
 using server.Dtos.Expense;
+using server.Extensions;
 using server.Models;
 using server.Responses.Expense;
+using server.UseCases.CreateExpense;
 
 namespace Server.Controllers;
 
-public class ExpenseController(ApplicationDbContext dbContext) : ApiControllerBase
+public class ExpenseController(ApplicationDbContext dbContext, CreateExpense createExpense) : ApiControllerBase
 {
     [HttpPost]
     public async Task<ActionResult<ExpenseResponse>> Create(CreateExpenseDto createExpenseDto)
     {
-        int accountId = createExpenseDto.AccountId;
-        // Todo: Extract into class
-        Account? account = await dbContext.Accounts.FirstOrDefaultAsync(a => a.Id == accountId);
-        if (account is null)
-        {
-            return NotFound($"Account by id {accountId} not found!");
-        }
+        ExpenseResponse expenseResponse = await createExpense.Perform(createExpenseDto);
 
-        account.Balance -= createExpenseDto.Amount;
-        
-        Expense expense = new Expense
-        {
-            Amount = createExpenseDto.Amount,
-            Date = createExpenseDto.Date,
-            Note = createExpenseDto.Note,
-            CategoryId = createExpenseDto.CategoryId,
-            CategoryType = createExpenseDto.CategoryType,
-            AccountId = accountId,
-        };
-
-        dbContext.Expenses.Add(expense);
-        await dbContext.SaveChangesAsync();
-
-        return Ok(new ExpenseResponse(expense));
+        return Ok(expenseResponse);
     }
 
     [HttpPut("{id}")]
@@ -68,7 +49,7 @@ public class ExpenseController(ApplicationDbContext dbContext) : ApiControllerBa
 
         await dbContext.SaveChangesAsync();
 
-        return Ok(new ExpenseResponse(expense));
+        return Ok(expense.MapToResponse());
     }
 
     [HttpDelete("{id}")]
@@ -105,14 +86,14 @@ public class ExpenseController(ApplicationDbContext dbContext) : ApiControllerBa
             return NotFound($"Expense with id {id} not found!");
         }
 
-        return Ok(new ExpenseResponse(expense));
+        return Ok(expense.MapToResponse());
     }
 
     [HttpGet]
     public async Task<ActionResult<List<ExpenseResponse>>> GetAll()
     {
         List<Expense> expenses = await dbContext.Expenses.ToListAsync();
-        List<ExpenseResponse> responses = expenses.Select(expense => new ExpenseResponse(expense)).ToList();
+        List<ExpenseResponse> responses = expenses.Select(expense => expense.MapToResponse()).ToList();
         
         return Ok(responses);
     }
