@@ -1,6 +1,4 @@
 using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using server.Context;
 using server.Dtos;
 using server.Dtos.User;
@@ -9,13 +7,25 @@ using server.Models;
 using server.Responses.User;
 using server.Services;
 
-namespace server.UseCases.CreateUser;
+namespace server.UseCases.Auth;
 
 public class CreateUser(ApplicationDbContext dbContext, IEmailService emailService)
 {
     public async Task<UserResponse> Perform(CreateUserDto createUserDto)
     {
-        User user = new()
+        User user = MakeUserObject(createUserDto);
+
+        SendEmailConfirmationAsync(user);
+
+        dbContext.Users.Add(user);
+        await dbContext.SaveChangesAsync();
+
+        return user.MapToResponse();
+    }
+
+    private static User MakeUserObject(CreateUserDto createUserDto)
+    {
+        return new User
         {
             Name = createUserDto.Name,
             Email = createUserDto.Email,
@@ -31,13 +41,6 @@ public class CreateUser(ApplicationDbContext dbContext, IEmailService emailServi
                 }
             }
         };
-
-        SendEmailConfirmationAsync(user);
-
-        dbContext.Users.Add(user);
-        await dbContext.SaveChangesAsync();
-
-        return user.MapToResponse();
     }
 
     private async void SendEmailConfirmationAsync(User user)
